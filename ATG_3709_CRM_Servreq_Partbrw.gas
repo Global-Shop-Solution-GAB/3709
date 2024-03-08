@@ -1,0 +1,48 @@
+Program.Sub.ScreenSU.Start
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'10/17/10
+'Hook 42968
+'ANS
+
+V.Local.widths.Declare(String)
+V.Local.titles.Declare(String)
+V.Local.results.Declare(String)
+V.Local.cancel.Declare(Long)
+V.Local.sPart.Declare(String)
+V.Local.sRev.Declare(String)
+
+F.ODBC.Connection!con.Openconnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+F.Intrinsic.String.Split("Part*!*Loc*!*Description*!*On Hand*!*Lead*!*Catalog Number","*!*",V.Local.titles)
+F.Intrinsic.String.Split("1800*!*400*!*3200*!*1200*!*0*!*3200","*!*",V.Local.widths)
+
+F.Intrinsic.UI.Browser("Select a Inventory Part","con","Select V_Inventory_Mstr.Part, V_Inventory_Mstr.Location, Description, Qty_OnHand, Time_Material_Lead, Text_Info1 from V_Inventory_Mstr inner join V_Inventory_Mst2 on V_Inventory_Mstr.Part=V_Inventory_Mst2.Part and V_Inventory_Mstr.Location=V_Inventory_Mst2.Location order by Part, Location",V.Local.titles,V.Local.widths,11000,6000,V.Local.results)
+F.Intrinsic.String.Split(V.Local.results,"*!*",V.Local.results)
+
+'If browser is canceled do not pass back values
+F.Intrinsic.String.Instr(V.Local.results,"***CANCEL***",1,V.Local.cancel)
+F.Intrinsic.Control.If(V.Local.cancel,=,0)
+	F.Intrinsic.String.Left(V.Local.results(0),17,V.Local.sPart)
+	F.Intrinsic.String.Right(V.Local.results(0),3,V.Local.sRev)
+	V.Passed.CRM-txtSRPart.Set(V.Local.sPart)
+	V.Passed.CRM-txtSRRev.Set(V.Local.sRev)
+	V.Passed.CRM-txtSRLoc.Set(V.Local.results(1))
+F.Intrinsic.Control.EndIf
+V.Passed.DATA-777777.Set(1)
+	
+F.ODBC.Connection!con.close
+
+Program.Sub.Main.End
+
+Program.Sub.Comments.Start
+${$0$}$ATG_3709_CRM_Servreq_Partbrw$}$JCT$}$4/6/2016
+${$1$}$$}$$}$0$}$42968$}$CRM.NET-SERVREQ-PART-BRW$}$4/6/2016 3:08:36 PM$}$(Program: Global_Shop_CRM.exe; Screen: )
+
+Program.Sub.Comments.End
+
